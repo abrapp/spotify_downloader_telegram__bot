@@ -31,14 +31,13 @@ def DOWNLOADMP3(link,chat_id):
 
     if len(artistfinder) > 1:
         fetures = "(Ft."
-        for lomi in range(0, len(artistfinder)):
+        for lomi in range(len(artistfinder)):
             try:
                 if lomi < len(artistfinder) - 2:
                     artistft = artistfinder[lomi + 1]['name'] + ", "
-                    fetures += artistft
                 else:
                     artistft = artistfinder[lomi + 1]['name'] + ")"
-                    fetures += artistft
+                fetures += artistft
             except:
                 pass
     else:
@@ -59,7 +58,7 @@ def DOWNLOADMP3(link,chat_id):
 
         if seconds == 10:
             time_duration2 = "{0}:0{1}".format(minutes, seconds - 1)
-        elif seconds == 58 or seconds == 59:
+        elif seconds in {58, 59}:
             time_duration3 = "{0}:0{1}".format(minutes + 1, seconds - 58)
             if seconds == 59:
                 time_duration1 = "{0}:0{1}".format(minutes + 1, seconds - 59)
@@ -69,11 +68,12 @@ def DOWNLOADMP3(link,chat_id):
         time_duration1 = "{0}:0{1}".format(minutes, seconds + 1)
         time_duration2 = "{0}:0{1}".format(minutes, seconds - 1)
         time_duration3 = "{0}:0{1}".format(minutes, seconds + 2)
-        if seconds == 9 or seconds == 8:
+        if seconds == 9:
             time_duration3 = "{0}:{1}".format(minutes, seconds + 2)
-            if seconds == 9:
-                time_duration1 = "{0}:{1}".format(minutes, seconds + 1)
+            time_duration1 = "{0}:{1}".format(minutes, seconds + 1)
 
+        elif seconds == 8:
+            time_duration3 = "{0}:{1}".format(minutes, seconds + 2)
         elif seconds == 0:
             time_duration2 = "{0}:{1}".format(minutes - 1, seconds + 59)
 
@@ -81,23 +81,22 @@ def DOWNLOADMP3(link,chat_id):
 
     response = requests.get(results['album']['images'][0]['url'])
     DIRCOVER = "songpicts//" + trackname + ".png"
-    file = open(DIRCOVER, "wb")
-    file.write(response.content)
-    file.close()
-
+    with open(DIRCOVER, "wb") as file:
+        file.write(response.content)
     results = list(YoutubeSearch(str(YTSEARCH)).to_dict())
     try:
         LINKASLI = ''
 
         for URLSSS in results:
             timeyt = URLSSS["duration"]
-            if timeyt == time_duration or timeyt == time_duration1:
+            if timeyt in [
+                time_duration,
+                time_duration1,
+                time_duration2,
+                time_duration3,
+            ]:
                 LINKASLI = URLSSS['url_suffix']
                 break
-            elif timeyt == time_duration2 or timeyt == time_duration3:
-                LINKASLI = URLSSS['url_suffix']
-                break
-
         YTLINK = str("https://www.youtube.com/" + LINKASLI)
         print(YTLINK)
 
@@ -135,8 +134,8 @@ def DOWNLOADMP3(link,chat_id):
         aud.tag.save()
         CAPTION = f'Track: {song}\nAlbum: {album}\nArtist: {artist}'
         bot.sendAudio(chat_id, open(f'song//{trackname}.mp3', 'rb'), title=trackname, caption=CAPTION)
-        # change the chat_id with ur channel chat id for sending music to the channel
-        # bot.sendAudio(chat_id, open(f'song//{trackname}.mp3', 'rb'), title=trackname, caption=CAPTION)
+            # change the chat_id with ur channel chat id for sending music to the channel
+            # bot.sendAudio(chat_id, open(f'song//{trackname}.mp3', 'rb'), title=trackname, caption=CAPTION)
 
     except:
         bot.sendSticker(chat_id, 'CAACAgQAAxkBAAIFSWBF_m3GHUtZJxQzobvD_iWxYVClAAJuAgACh4hSOhXuVi2-7-xQHgQ')

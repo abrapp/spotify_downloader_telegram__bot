@@ -32,11 +32,9 @@ def downloader(link, chat_id, type):
         ITEMS = []
 
     MESSAGE = ""
-    COUNT = 0
-    for song in ITEMS:
+    for COUNT, song in enumerate(ITEMS, start=1):
         if type == 'PL':
             song = song['track']
-        COUNT += 1
         MESSAGE += f"{COUNT}. {song['name']}\n"
     bot.sendMessage(chat_id, MESSAGE)
 
@@ -79,25 +77,24 @@ def START(msg, chat_id):
         sort[chat_id] = 'artist'
         bot.sendMessage(chat_id, 'send name and name of artist like this: \nName artist')
 
+    elif chat_id in sort:
+        try:
+            if sort[chat_id] == 'artist':
+                downloader(spotify.searchartist(msg), chat_id, 'AR')
+            elif sort[chat_id] == 'album':
+                downloader(spotify.searchalbum(msg), chat_id, 'AL')
+            elif sort[chat_id] == 'single':
+                SONGDOWNLOADER(spotify.searchsingle(msg), chat_id)
+
+            del sort[chat_id]
+
+        except:
+            bot.sendSticker(chat_id, 'CAACAgQAAxkBAAIFSWBF_m3GHUtZJxQzobvD_iWxYVClAAJuAgACh4hSOhXuVi2-7-xQHgQ')
+            bot.sendMessage(chat_id, "can't download one of them")
+
     else:
-        if chat_id in sort:
-            try:
-                if sort[chat_id] == 'artist':
-                    downloader(spotify.searchartist(msg), chat_id, 'AR')
-                elif sort[chat_id] == 'album':
-                    downloader(spotify.searchalbum(msg), chat_id, 'AL')
-                elif sort[chat_id] == 'single':
-                    SONGDOWNLOADER(spotify.searchsingle(msg), chat_id)
-
-                del sort[chat_id]
-
-            except:
-                bot.sendSticker(chat_id, 'CAACAgQAAxkBAAIFSWBF_m3GHUtZJxQzobvD_iWxYVClAAJuAgACh4hSOhXuVi2-7-xQHgQ')
-                bot.sendMessage(chat_id, "can't download one of them")
-
-        else:
-            bot.sendSticker(chat_id, 'CAACAgQAAxkBAAIBFGBLNcpfFcTLxnn5lR20ZbE2EJbrAAJRAQACEqdqA2XZDc7OSUrIHgQ')
-            bot.sendMessage(chat_id,'send me link or use /single or /album or /artist')
+        bot.sendSticker(chat_id, 'CAACAgQAAxkBAAIBFGBLNcpfFcTLxnn5lR20ZbE2EJbrAAJRAQACEqdqA2XZDc7OSUrIHgQ')
+        bot.sendMessage(chat_id,'send me link or use /single or /album or /artist')
 
 print('Listening ...')
 
@@ -114,7 +111,7 @@ def UPDATE():
 
 
 while 1:
-    if threading.activeCount()-1 < 15:
+    if threading.activeCount() < 16:
         try:
             for message in UPDATE():
                 offset = message['update_id']+1
